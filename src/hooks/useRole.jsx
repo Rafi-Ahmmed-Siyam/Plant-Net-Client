@@ -10,6 +10,7 @@ const useRole = () => {
       data: role = [],
       isPending,
       isLoading,
+      refetch,
    } = useQuery({
       enabled: !loading && !!user?.email,
       queryKey: ['role', user?.email],
@@ -19,7 +20,7 @@ const useRole = () => {
       },
    });
    // console.role(role);
-   return { role, isLoading, isPending };
+   return { role, isLoading, isPending, refetch };
 };
 
 export default useRole;

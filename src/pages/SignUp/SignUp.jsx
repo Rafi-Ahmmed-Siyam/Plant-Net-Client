@@ -5,11 +5,13 @@ import { toast } from 'react-hot-toast';
 import { TbFidgetSpinner } from 'react-icons/tb';
 import axios from 'axios';
 import { imageBBUpload, saveUser } from '../../API/utils';
+import useRole from '../../hooks/useRole';
 
 const SignUp = () => {
    const { createUser, updateUserProfile, signInWithGoogle, loading } =
       useAuth();
    const navigate = useNavigate();
+   const { refetch } = useRole();
    // form submit handler
    const handleSubmit = async (event) => {
       event.preventDefault();
@@ -18,15 +20,7 @@ const SignUp = () => {
       const email = form.email.value;
       const password = form.password.value;
       const image = form.image.files;
-      // const formData = new FormData();
-      // formData.append('image', image);
 
-      // const { data } = await axios.post(
-      //    `https://api.imgbb.com/1/upload?key=${
-      //       import.meta.env.VITE_IMGBB_API_KEY
-      //    }`,
-      //    formData
-      // );
       const image_url = await imageBBUpload(image);
 
       try {
@@ -46,9 +40,12 @@ const SignUp = () => {
 
          navigate('/');
          toast.success('Signup Successful');
+         refetch();
       } catch (err) {
          console.log(err);
          toast.error(err?.message);
+      } finally {
+         refetch();
       }
    };
 
@@ -60,10 +57,13 @@ const SignUp = () => {
          // Save user data in database
          await saveUser(data?.user);
          navigate('/');
+         refetch();
          toast.success('Signup Successful');
       } catch (err) {
          console.log(err);
          toast.error(err?.message);
+      } finally {
+         refetch();
       }
    };
    return (

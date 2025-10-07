@@ -50,7 +50,12 @@ const PurchaseModal = ({ closeModal, isOpen, plantDetails, refetch }) => {
       // console.log(totalQuantity);
    };
 
+   // if (!user?.email) return navigate('/login');
+
    const handlePurchase = async () => {
+      if (!user) {
+         return navigate('/login');
+      }
       if (!customerAddress) {
          return toast.error('Please Enter Your Address');
       }

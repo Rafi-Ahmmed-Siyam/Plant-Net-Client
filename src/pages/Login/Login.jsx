@@ -4,11 +4,14 @@ import useAuth from '../../hooks/useAuth';
 import toast from 'react-hot-toast';
 import { TbFidgetSpinner } from 'react-icons/tb';
 import LoadingSpinner from '../../components/Shared/LoadingSpinner';
+import { saveUser } from '../../API/utils';
+import useRole from '../../hooks/useRole';
 
 const Login = () => {
    const { signIn, signInWithGoogle, loading, user } = useAuth();
    const navigate = useNavigate();
    const location = useLocation();
+   const { refetch } = useRole();
    const from = location?.state?.from?.pathname || '/';
    if (loading) return <LoadingSpinner />;
    if (user) return <Navigate to={from} replace={true} />;
@@ -25,9 +28,12 @@ const Login = () => {
 
          navigate(from, { replace: true });
          toast.success('Login Successful');
+         refetch();
       } catch (err) {
          console.log(err);
          toast.error(err?.message);
+      } finally {
+         refetch();
       }
    };
 
@@ -35,12 +41,16 @@ const Login = () => {
    const handleGoogleSignIn = async () => {
       try {
          //User Registration using google
-         await signInWithGoogle();
+         const result = await signInWithGoogle();
+         await saveUser(result?.user);
          navigate(from, { replace: true });
          toast.success('Login Successful');
+         refetch();
       } catch (err) {
          console.log(err);
          toast.error(err?.message);
+      } finally {
+         refetch();
       }
    };
    return (

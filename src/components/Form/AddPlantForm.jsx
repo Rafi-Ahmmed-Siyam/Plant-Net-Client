@@ -1,6 +1,6 @@
-
 import PropTypes from 'prop-types';
 import { TbFidgetSpinner } from 'react-icons/tb';
+import { sortImageName } from '../../Utilities';
 
 const AddPlantForm = ({
    handleSubmit,
@@ -103,8 +103,7 @@ const AddPlantForm = ({
                            <label>
                               <input
                                  onChange={
-                                    (e) =>
-                                       setUploadImage(e.target.files[0])
+                                    (e) => setUploadImage(e.target.files[0])
                                     // console.log(e.target.files[0])
                                  }
                                  className="text-sm cursor-pointer w-36 hidden"
@@ -115,20 +114,23 @@ const AddPlantForm = ({
                                  hidden
                               />
                               <div className="bg-lime-500 text-white border border-gray-300 rounded font-semibold cursor-pointer p-1 px-3 hover:bg-lime-500">
-                                 {uploadImage.name}
+                                 {/* {uploadImage.name} */}
+                                 {sortImageName(uploadImage)}
                               </div>
                            </label>
                         </div>
                      </div>
                      {uploadImage.size && (
                         <>
-                           
-                        <img className='w-14 mt-4' src={URL.createObjectURL(uploadImage)} alt="image-preview" />
-                        <p className="mt-3 font-medium">
-                           Size:{uploadImage.size} Bytes
-                        </p>
+                           <img
+                              className="w-14 mt-4"
+                              src={URL.createObjectURL(uploadImage)}
+                              alt="image-preview"
+                           />
+                           <p className="mt-3 font-medium">
+                              Size:{uploadImage.size} Bytes
+                           </p>
                         </>
-                       
                      )}
                   </div>
 
