@@ -14,7 +14,21 @@ import useAuth from '../../hooks/useAuth';
 import useAxiosSecure from '../../hooks/useAxiosSecure';
 import { useNavigate } from 'react-router-dom';
 
-const PurchaseModal = ({ closeModal, isOpen, plantDetails, refetch }) => {
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CheckoutForm from '../Form/CheckoutForm';
+
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+// console.log(stripePromise);
+
+const PurchaseModal = ({
+   closeModal,
+   isOpen,
+   plantDetails,
+   refetch,
+   plantId,
+}) => {
+   // console.log('this id', plantId);
    // Total Price Calculation
    const { user } = useAuth();
    const axiosSecure = useAxiosSecure();
@@ -50,64 +64,20 @@ const PurchaseModal = ({ closeModal, isOpen, plantDetails, refetch }) => {
       // console.log(totalQuantity);
    };
 
-   // if (!user?.email) return navigate('/login');
-
-   const handlePurchase = async () => {
-      if (!user) {
-         return navigate('/login');
-      }
-      if (!customerAddress) {
-         return toast.error('Please Enter Your Address');
-      }
-      if (!totalQuantity)
-         return toast.error('Please Enter quantity less then 1');
-      const purchaseInfo = {
-         customer: {
-            name: user?.displayName,
-            email: user?.email,
-            image: user?.photoURL,
-         },
-         plantId: _id,
-         price: totalPrice,
-         quantity: totalQuantity < 1 ? 1 : totalQuantity,
-         address: customerAddress,
-         seller: seller.email,
-         status: 'Pending',
-      };
-
-      // console.log(purchaseInfo);
-
-      try {
-         // Save order data in Database
-         const { data: insertResult } = await axiosSecure.post(
-            '/orders',
-            purchaseInfo
-         );
-         // Update plant Quantity
-         const { data: updateQuantityResult } = await axiosSecure.patch(
-            '/plants/quantity',
-            {
-               id: _id,
-               quantity: totalQuantity,
-            }
-         );
-         if (
-            insertResult?.insertedId &&
-            updateQuantityResult.modifiedCount > 0
-         ) {
-            toast.success('Order Successful');
-            navigate('/dashboard/my-orders');
-         }
-      } catch (err) {
-         console.log(err);
-         toast.error(err.message);
-      } finally {
-         closeModal();
-         setTotalQuantity(1);
-         setCustomerAddress('');
-         refetch();
-      }
+   const purchaseInfo = {
+      customer: {
+         name: user?.displayName,
+         email: user?.email,
+         image: user?.photoURL,
+      },
+      plantId: _id,
+      price: totalPrice,
+      quantity: totalQuantity < 1 ? 1 : totalQuantity,
+      address: customerAddress,
+      seller: seller.email,
+      status: 'Pending',
    };
+
    return (
       <Transition appear show={isOpen} as={Fragment}>
          <Dialog as="div" className="relative z-10" onClose={closeModal}>
@@ -189,7 +159,7 @@ const PurchaseModal = ({ closeModal, isOpen, plantDetails, refetch }) => {
                         </div>
 
                         {/* Address Feald */}
-                        <div className="space-x-2 text-sm mt-3">
+                        <div className="space-x-2 text-sm mt-3 mb-5">
                            <label htmlFor="name" className=" text-gray-600">
                               Address :
                            </label>
@@ -206,24 +176,22 @@ const PurchaseModal = ({ closeModal, isOpen, plantDetails, refetch }) => {
                               required
                            />
                         </div>
-                        {!customerAddress && (
-                           <p className="text-red-400 text-sm mt-1 ml-16">
-                              Enter your Address
-                           </p>
-                        )}
 
-                        <div className="mt-3">
-                           <Button
-                              onClick={handlePurchase}
-                              label={`Pay $${!totalQuantity ? 0 : totalPrice}`}
-                              disabled={
-                                 totalQuantity > quantity ||
-                                 totalQuantity < 1 ||
-                                 !totalQuantity ||
-                                 !customerAddress
-                              }
+                        {/* Checkout Form */}
+                        <Elements stripe={stripePromise}>
+                           {/* Checkout Form */}
+                           <CheckoutForm
+                              purchaseInfo={purchaseInfo}
+                              totalQuantity={totalQuantity}
+                              setTotalQuantity={setTotalQuantity}
+                              totalPrice={totalPrice}
+                              customerAddress={customerAddress}
+                              setCustomerAddress={setCustomerAddress}
+                              closeModal={closeModal}
+                              refetch={refetch}
+                              plantId={plantId}
                            />
-                        </div>
+                        </Elements>
                      </DialogPanel>
                   </TransitionChild>
                </div>

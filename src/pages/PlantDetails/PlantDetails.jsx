@@ -131,7 +131,7 @@ const PlantDetails = () => {
                            !quantity ||
                            role === 'Seller' ||
                            role === 'Admin' ||
-                           seller.email === user.email
+                           seller?.email === user?.email
                         }
                         onClick={() => setIsOpen(true)}
                         label={!quantity ? 'Out Of Stock' : 'Purchase'}
@@ -145,6 +145,7 @@ const PlantDetails = () => {
                   refetch={refetch}
                   closeModal={closeModal}
                   isOpen={isOpen}
+                  plantId={_id}
                />
             </div>
          </div>
